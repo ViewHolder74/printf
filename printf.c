@@ -5,12 +5,21 @@
 
 #define BUFFER_SIZE 1024
 
-void print_buffer(char buffer[], int *buff_ind)
-{
-	if (*buff_ind > 0)
-		write(1, &buffer[0], *buff_ind);
+/**
+ * print_buffer - print what's in buffer
+ * @buffer: character string
+ * @j: index of char
+ *
+ * Return: void
+ *
+ */
 
-	*buff_ind = 0;
+void print_buffer(char buffer[], int *j)
+{
+	if (*j > 0)
+		write(1, &buffer[0], *j);
+
+	*j = 0;
 }
 /**
  * _printf - Function that produces output according to a format.
