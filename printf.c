@@ -34,13 +34,14 @@ void print_string(const char *s, int *count)
  * print_integer - print integer
  * @num: number to be printed
  * @count: count of num
+ * @base: base number
  * Return: void
  */
-void print_integer(int num, int *count)
+void print_integer(int num, int *count, int base)
 {
 	int tempNum = num;
 	char *numStr = NULL;
-	int i, digitCount = 0;
+	int i, digit, digitCount = 0;
 
 	if (num == 0)
 	{
@@ -54,14 +55,18 @@ void print_integer(int num, int *count)
 	}
 	while (tempNum > 0)
 	{
-		tempNum /= 10;
+		tempNum /= base;
 		digitCount++;
 	}
 	numStr = (char *)malloc((digitCount + 1) * sizeof(char));
 	for (i = digitCount - 1; i >= 0; i--)
 	{
-		numStr[i] = '0' + (num % 10);
-		num /= 10;
+		digit = num % base;
+		if (digit < 10)
+			numStr[i] = '0' + digit;
+		else
+			numStr[i] = 'a' + (digit - 10);
+		num /= base;
 	}
 	numStr[digitCount] = '\0';
 	print_string(numStr, count);
@@ -103,7 +108,7 @@ int _printf(const char *format, ...)
 	char *str;
 	char c, ch;
 	int i, num, counter = 0;
-	unsigned int b_num;
+	unsigned int b_num, a_num, c_num, d_num;
 
 	va_start(list, format);
 	for (i = 0; (c = format[i]); ++i)
@@ -111,20 +116,26 @@ int _printf(const char *format, ...)
 		if (c == '%')
 		{
 			c = format[++i];
-			if ((c == 'c') && (c == 's') && (c == '%') && (c == 'b'))
+			if ((c == 'c') && (c == 's') && (c == '%') && (c == 'u') &&  (c == 'o') && (c == 'x') && (c == 'X'))
 			{
 				ch = va_arg(list, int);
 				str = va_arg(list, char *);
 				b_num = va_arg(list, unsigned int);
+				a_num = va_arg(list, unsigned int);
+				c_num = va_arg(list, unsigned int);
+				d_num = va_arg(list, unsigned int);
 				print_char(ch, &counter);
 				print_string(str, &counter);
 				print_char('%', &counter);
-				print_binary(b_num, &counter);
+				print_integer(b_num, &counter, 10);
+				print_integer(a_num, &counter, 8);
+				print_integer(c_num, &counter, 16);
+				print_integer(d_num, &counter, 16);
 			}
 			else if (c == 'd' || c == 'i')
 			{
 				num = va_arg(list, int);
-				print_integer(num, &counter);
+				print_integer(num, &counter, 10);
 			}
 		}
 		else
