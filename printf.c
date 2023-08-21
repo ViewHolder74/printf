@@ -25,11 +25,9 @@ void print_char(char c, int *count)
 void print_string(const char *s, int *count)
 {
 	int i;
-		
-	for (i = 0; s[i]; i++)
-	{
+
+	for (i = 0; s[i]; ++i)
 		print_char(s[i], count);
-	}
 }
 
 /**
