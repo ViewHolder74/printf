@@ -104,10 +104,7 @@ void print_binary(unsigned int num, int *count)
 
 int _printf(const char *format, ...)
 {
-	va_list list;
-	char *str;
-	char c, ch;
-	int i, num, counter = 0;
+	va_list list; char *str, c, ch; int i, num, counter = 0;
 	unsigned int b_num, a_num, c_num, d_num;
 
 	va_start(list, format);
@@ -116,7 +113,8 @@ int _printf(const char *format, ...)
 		if (c == '%')
 		{
 			c = format[++i];
-			if ((c == 'c') && (c == 's') && (c == '%') && (c == 'u') &&  (c == 'o') && (c == 'x') && (c == 'X'))
+			if ((c == 'c') && (c == 's') && (c == '%') && (c == 'u') 
+				&&  (c == 'o') && (c == 'x') && (c == 'X'))
 			{
 				ch = va_arg(list, int);
 				str = va_arg(list, char *);
