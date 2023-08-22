@@ -98,7 +98,7 @@ void handle_custom_specifiers(char c, va_list list, int *count)
 {
 	int base;
 	unsigned int num1, num2;
-	char ch, *str, *str1, *ptr;
+	char ch, *str, *ptr;
 
 	if ((c == 'c' && c == 's' && c == '%'))
 	{
@@ -107,20 +107,6 @@ void handle_custom_specifiers(char c, va_list list, int *count)
 		print_character(ch, count);
 		print_string_to_buffer(str, count);
 		print_character('%', count);
-	}
-	else if (c == 'S')
-	{
-		str1 = va_arg(list, char *);
-		while (*str1)
-		{
-			if (*str1 < 32 || *str1 >= 127)
-				print_special_character(*str1, count);
-			else
-			{
-				print_character(*str1, count);
-			}
-			str1++;
-		}
 	}
 	else if ((c == 'b'))
 	{
