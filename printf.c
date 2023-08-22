@@ -4,40 +4,17 @@
 #include "main.h"
 #include <stdarg.h>
 
-/**
- * print_char - function that print character
- * @c: character
- * @count: number of character
- * Return: void
- */
-void print_char(char c, int *count)
-{
-	write(1, &c, 1);
-	(*count)++;
-}
+static char buffer[BUFFER_SIZE];
+static int buffer_index = 0;
 
 /**
- * print_string - function that print string
- * @s: string character
- * @count: number of string
- * Return: void
- */
-void print_string(const char *s, int *count)
-{
-	int i;
-
-	for (i = 0; s[i]; ++i)
-		print_char(s[i], count);
-}
-
-/**
- * print_integer - print integer
+ * print_integer_to_buffer - print integer
  * @num: number to be printed
  * @count: count of num
  * @base: base number
  * Return: void
  */
-void print_integer(int num, int *count, int base)
+void print_integer_to_buffer(int num, int *count, int base)
 {
 	int tempNum = num;
 	char *numStr = NULL;
@@ -45,12 +22,12 @@ void print_integer(int num, int *count, int base)
 
 	if (num == 0)
 	{
-		print_char('0', count);
+		print_character('0', count);
 		return;
 	}
 	if (num < 0)
 	{
-		print_char('-', count);
+		print_character('-', count);
 		num = -num;
 	}
 	while (tempNum > 0)
@@ -69,21 +46,30 @@ void print_integer(int num, int *count, int base)
 		num /= base;
 	}
 	numStr[digitCount] = '\0';
-	print_string(numStr, count);
+	append_to_buffer(numStr, count);
 	free(numStr);
 }
 
 /**
- * print_binary - print in into binary
+ * print_binary_to_buffer - print in into binary
  * @num: integer
  * @count: int count
  * Return: void
  */
-void print_binary(unsigned int num, int *count)
+void print_binary_to_buffer(unsigned int num, int *count)
 {
 	int i, j = 0;
 	char binaryStr[32];
 
+	if (num == 0)
+	{
+		buffer[buffer_index++] = '0';
+		if (buffer_index >= BUFFER_SIZE - 1)
+		{
+			flush_buffer(count);
+		}
+		return;
+	}
 	while (num > 0)
 	{
 		binaryStr[j++] = '0' + (num & 1);
@@ -91,56 +77,82 @@ void print_binary(unsigned int num, int *count)
 	}
 
 	for (i = j - 1; i >= 0; --i)
-		print_char(binaryStr[i], count);
+	{
+		buffer[buffer_index++] = binaryStr[i];
+		if (buffer_index >= BUFFER_SIZE - 1)
+			flush_buffer(count);
+	}
 }
 
 /**
- * _printf - Function that produces output according to a format.
- * @format: character string
+ * process_format - Function that produces output according to a format.
+ * @format: format
+ * @list: num args
+ * @count: counter
  *
- * Return: number of characters
+ * Return: void
  *
  */
 
-int _printf(const char *format, ...)
+void process_format(const char *format, va_list list, int *count)
 {
-	va_list list; char *str, c, ch; int i, num, counter = 0;
-	unsigned int b_num, a_num, c_num, d_num;
+	int i, j, base;
+	unsigned int num1, num2;
+	char c, ch, *str;
 
-	va_start(list, format);
 	for (i = 0; (c = format[i]); ++i)
 	{
 		if (c == '%')
 		{
 			c = format[++i];
-			if ((c == 'c') && (c == 's') && (c == '%') && (c == 'u') 
-				&&  (c == 'o') && (c == 'x') && (c == 'X'))
+			if (c == 'd' || c == 'i')
+			{
+				j = va_arg(list, int);
+				print_integer_to_buffer(j, count, 10);
+			}
+			else if ((c == 'c') && (c == 's') && (c == '%'))
 			{
 				ch = va_arg(list, int);
 				str = va_arg(list, char *);
-				b_num = va_arg(list, unsigned int);
-				a_num = va_arg(list, unsigned int);
-				c_num = va_arg(list, unsigned int);
-				d_num = va_arg(list, unsigned int);
-				print_char(ch, &counter);
-				print_string(str, &counter);
-				print_char('%', &counter);
-				print_integer(b_num, &counter, 10);
-				print_integer(a_num, &counter, 8);
-				print_integer(c_num, &counter, 16);
-				print_integer(d_num, &counter, 16);
+				print_character(ch, count);
+				print_string_to_buffer(str, count);
+				print_character('%', count);
 			}
-			else if (c == 'd' || c == 'i')
+			else if ((c == 'b'))
 			{
-				num = va_arg(list, int);
-				print_integer(num, &counter, 10);
+				num1 = va_arg(list, unsigned int);
+				print_binary_to_buffer(num1, count);
+			}
+			else if ((c == 'u' || c == 'o' || c == 'x' || c == 'X'))
+			{
+				num2 = va_arg(list, unsigned int);
+				base = (c == 'o') ? 8 : ((c == 'x' || c == 'X')
+						? 16 : 10);
+				print_integer_to_buffer(num2, count, base);
 			}
 		}
 		else
 		{
-			print_char(c, &counter);
+			print_character(c, count);
 		}
 	}
+}
+
+/**
+ * _printf - Printf function
+ * @format: format
+ * Return: printed characters
+ *
+ */
+int _printf(const char *format, ...)
+{
+	va_list list;
+	int counter = 0;
+
+	va_start(list, format);
+	process_format(format, list, &counter);
 	va_end(list);
+
+	flush_buffer(&counter);
 	return (counter);
 }
