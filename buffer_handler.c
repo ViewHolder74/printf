@@ -66,3 +66,26 @@ void print_string_to_buffer(const char *s, int *count)
 		s++;
 	}
 }
+/**
+ * print_special_character - special char
+ * @c: char
+ * @count: count
+ * Return: void
+ */
+void print_special_character(char c, int *count)
+{
+	buffer[buffer_index++] = '\\';
+	buffer[buffer_index++] = 'x';
+
+	if (c < 16)
+	{
+		buffer[buffer_index++] = '0';
+	}
+	buffer[buffer_index++] = (c >> 4) < 10 ? '0' + (c >> 4) 
+		: 'A' + ((c >> 4) - 10);
+	buffer[buffer_index++] = (c & 0x0F) < 10 ? '0' + (c & 0x0f) 
+		: 'A' + ((c & 0x0F) - 10);
+	if (buffer_index >= BUFFER_SIZE - 1)
+		flush_buffer(count);
+}
+
