@@ -67,3 +67,18 @@ void print_string_to_buffer(const char *s, int *count)
 	}
 }
 
+/**
+ * print_pointer_to_buffer - print pointer to buffer
+ * @ptr: pointer
+ * @count: counter
+ * return: void
+ *
+ */
+void print_pointer_to_buffer(void *ptr, int *count)
+{
+	unsigned long i = (unsigned long) ptr;
+
+	print_character('0', count);
+	print_character('x', count);
+	print_integer_to_buffer(i, count, 16);
+}
