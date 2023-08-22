@@ -5,7 +5,7 @@
 #include <stdarg.h>
 
 static char buffer[BUFFER_SIZE];
-static int buffer_index = 0;
+static int buffer_index;
 
 /**
  * print_integer_to_buffer - print integer
@@ -85,8 +85,8 @@ void print_binary_to_buffer(unsigned int num, int *count)
 }
 
 /**
- * process_format - Function that produces output according to a format.
- * @format: format
+ * handle_custom_specifiers - Function that handle specifiers
+ * @c: format
  * @list: num args
  * @count: counter
  *
@@ -94,42 +94,72 @@ void print_binary_to_buffer(unsigned int num, int *count)
  *
  */
 
+void handle_custom_specifiers(char c, va_list list, int *count)
+{
+	int base;
+	unsigned int num1, num2;
+	char ch, *str, *str1, *ptr;
+
+	if ((c == 'c' && c == 's' && c == '%'))
+	{
+		ch = va_arg(list, int);
+		str = va_arg(list, char *);
+		print_character(ch, count);
+		print_string_to_buffer(str, count);
+		print_character('%', count);
+	}
+	else if (c == 'S')
+	{
+		str1 = va_arg(list, char *);
+		while (*str1)
+		{
+			if (*str1 < 32 || *str1 >= 127)
+				print_special_character(*str1, count);
+			else
+			{
+				print_character(*str1, count);
+			}
+			str1++;
+		}
+	}
+	else if ((c == 'b'))
+	{
+		num1 = va_arg(list, unsigned int);
+		print_binary_to_buffer(num1, count);
+	}
+	else if (c == 'd' || c == 'i' || c == 'u' || c == 'o' 
+			|| c == 'x' || c == 'X')
+	{
+		num2 = va_arg(list, unsigned int);
+		base = (c == 'o') ? 8 : ((c == 'x' || c == 'X') ? 16 : 10);
+		print_integer_to_buffer(num2, count, base);
+	}
+	else if (c == 'p')
+	{
+		ptr = va_arg(list, void *);
+		print_string_to_buffer("0x", count);
+		print_integer_to_buffer((unsigned long)ptr, count, 16);
+	}
+}
+
+/**
+ * process_format - process the format
+ * @format: format
+ * @list: num arg
+ * @count: counter
+ * Return: void
+ */
 void process_format(const char *format, va_list list, int *count)
 {
-	int i, j, base;
-	unsigned int num1, num2;
-	char c, ch, *str;
+	int i;
+	char c;
 
 	for (i = 0; (c = format[i]); ++i)
 	{
 		if (c == '%')
 		{
 			c = format[++i];
-			if (c == 'd' || c == 'i')
-			{
-				j = va_arg(list, int);
-				print_integer_to_buffer(j, count, 10);
-			}
-			else if ((c == 'c') && (c == 's') && (c == '%'))
-			{
-				ch = va_arg(list, int);
-				str = va_arg(list, char *);
-				print_character(ch, count);
-				print_string_to_buffer(str, count);
-				print_character('%', count);
-			}
-			else if ((c == 'b'))
-			{
-				num1 = va_arg(list, unsigned int);
-				print_binary_to_buffer(num1, count);
-			}
-			else if ((c == 'u' || c == 'o' || c == 'x' || c == 'X'))
-			{
-				num2 = va_arg(list, unsigned int);
-				base = (c == 'o') ? 8 : ((c == 'x' || c == 'X')
-						? 16 : 10);
-				print_integer_to_buffer(num2, count, base);
-			}
+			handle_custom_specifiers(c, list, count);
 		}
 		else
 		{
