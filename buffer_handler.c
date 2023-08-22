@@ -1,8 +1,7 @@
 #include "main.h"
 
 static char buffer[BUFFER_SIZE];
-static int buffer_index = 0;
-
+static int buffer_index;
 /**
  * flush_buffer - clear buffer
  * @count: counter
@@ -11,6 +10,7 @@ static int buffer_index = 0;
  */
 void flush_buffer(int *count)
 {
+
 	write(1, buffer, buffer_index);
 	*count += buffer_index;
 	buffer_index = 0;
@@ -44,6 +44,7 @@ void append_to_buffer(const char *str, int *count)
  */
 void print_character(char c, int *count)
 {
+
 	buffer[buffer_index++] = c;
 	if (buffer_index >= BUFFER_SIZE - 1)
 	{
@@ -59,5 +60,10 @@ void print_character(char c, int *count)
  */
 void print_string_to_buffer(const char *s, int *count)
 {
-	append_to_buffer(s, count);
+	while (*s)
+	{
+		print_character(*s, count);
+		s++;
+	}
 }
+
